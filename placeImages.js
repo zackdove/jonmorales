@@ -11,6 +11,21 @@ let dragStartY = 0;
 let dragEndX = 0;
 let dragEndY = 0;
 
+let currentZ = 1;
+
+let hasActive = false;
+let currentImg;
+let prevLeft;
+let prevWidth;
+let prevScroll;
+let prevHeight;
+let prevRect;
+let prevScale;
+let xOffset = 0;
+let yOffset = 0;
+
+window.addEventListener("mousemove", handleDrag);
+
 for (let i = 0; i < imageConfig.images.length; i++) {
   const img = document.createElement("img");
   img.src = imageConfig.images[i].url;
@@ -29,20 +44,26 @@ for (let i = 0; i < imageConfig.images.length; i++) {
   img.addEventListener("mousedown", (e) => {
     drag = false;
     mouseDown = true;
+    img.style.zIndex = currentZ;
+    currentZ++;
+    currentImg = e.target;
     dragStartX = e.clientX;
     dragStartY = e.clientY;
+    // if (hasActive) removeActive();
   });
-  img.addEventListener("mousemove", handleDrag);
+
   img.addEventListener("mouseup", (e) => {
     drag ? null : handleClick(e);
 
-    img.dataset.dragEndX =
-      Number(img.dataset.dragEndX) + e.clientX - dragStartX;
-    img.dataset.dragEndY =
-      Number(img.dataset.dragEndY) + e.clientY - dragStartY;
-    dragStartX = null;
-    dragStartY = null;
-    mouseDown = false;
+    if (!hasActive) {
+      img.dataset.dragEndX =
+        Number(img.dataset.dragEndX) + e.clientX - dragStartX;
+      img.dataset.dragEndY =
+        Number(img.dataset.dragEndY) + e.clientY - dragStartY;
+      dragStartX = null;
+      dragStartY = null;
+      mouseDown = false;
+    }
   });
 
   img.addEventListener("mouseout", (e) => {
@@ -51,6 +72,16 @@ for (let i = 0; i < imageConfig.images.length; i++) {
     // dragStartY = null;
     // mouseDown = false;
   });
+
+  if (i == imageConfig.images.length - 1) {
+    const div = document.createElement("div");
+    div.style.top = img.style.top;
+    div.style.height = "120vh";
+    div.style.width = "1px";
+    div.style.position = "absolute";
+    div.style.userSelect = "none";
+    imagesContainer.appendChild(div);
+  }
 }
 
 // Notes
@@ -60,19 +91,9 @@ for (let i = 0; i < imageConfig.images.length; i++) {
 // 1. on click (pre transform)
 // 2. post transform
 
-let hasActive = false;
-let currentImg;
-let prevLeft;
-let prevWidth;
-let prevScroll;
-let prevHeight;
-let prevRect;
-let prevScale;
-let xOffset = 0;
-let yOffset = 0;
-
 function makeActive(img) {
   currentImg = img;
+
   prevLeft = img.style.left;
   prevTop = img.style.top;
   prevWidth = img.style.width;
@@ -153,6 +174,7 @@ function removeActive() {
 
 window.addEventListener("scroll", handleScroll);
 function handleScroll(e) {
+  mouseDown = false;
   if (hasActive) removeActive();
 }
 
@@ -168,8 +190,8 @@ function handleClick(e) {
 
 function handleDrag(e) {
   drag = true;
-  if (mouseDown) {
-    const img = e.target;
+  if (mouseDown && !hasActive) {
+    const img = currentImg;
     // const deltaX = dragStartX ? e.clientX - dragStartX : 0;
     // const deltaY = dragStartY ? e.clientY - dragStartY : 0;
     // dragEndX = deltaX;

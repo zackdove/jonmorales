@@ -59,13 +59,14 @@ user-select: none;
     max-width: 100vw;
     position: absolute;
     cursor: pointer;
+    user-select: none;
 }
 
 
 #imagesContainer .placedImage.active{
     /* position: fixed; */
     pointer-events: all;
-    z-index: 9999;
+    cursor: zoom-out;
 }
 
 #imagesContainer .placedImage.grabbing{
